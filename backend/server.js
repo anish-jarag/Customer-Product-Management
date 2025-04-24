@@ -12,6 +12,7 @@ app.use(express.json());
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/customers", require("./routes/customerRoutes"));
 app.use("/api/products", require("./routes/product"));
+app.use("/api/categories", require("./routes/category"));
 
 app.get("/", (req, res) => {
   res.send("API is running");
