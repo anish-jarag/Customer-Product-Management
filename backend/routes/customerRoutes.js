@@ -7,9 +7,10 @@ const {
   getCustomerById,
   updateCustomer,
   deleteCustomer,
+  createCustomer,
 } = require("../controllers/customerController");
 
-router.post("/", addCustomer);
+router.post("/", createCustomer);
 
 router.get("/", getCustomers);
 
