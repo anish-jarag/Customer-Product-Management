@@ -1,8 +1,7 @@
-// server/routes/authRoutes.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/userModel");
+const { findUserByEmail } = require("../models/userModel");
 const router = express.Router();
 
 // Login route
@@ -10,7 +9,8 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    let user = await User.findOne({ email });
+    const user = await findUserByEmail(email);
+
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -28,7 +28,6 @@ router.post("/login", async (req, res) => {
       },
     };
 
-    // Generate JWT token (expire in 1 hour)
     jwt.sign(payload, "secretOrKey", { expiresIn: 3600 }, (err, token) => {
       if (err) throw err;
       res.json({
