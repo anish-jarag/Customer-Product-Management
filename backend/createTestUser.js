@@ -7,16 +7,16 @@ async function createTestUser() {
   const db = getDB();
   const users = db.collection("users");
 
-  const password = "test123"; // the plain text password
+  const password = "admin123"; // the plain text password
   const hashedPassword = await bcrypt.hash(password, 10); // hashing the password
 
   await users.insertOne({
-    email: "test@example.com",
+    email: "em@gmail.com",
     password: hashedPassword,
-    role: "user",
+    role: "admin",
   });
 
-  console.log("✅ Test user created!");
+  console.log("✅ Admin created!");
   process.exit(); // Exit the script after running
 }
 

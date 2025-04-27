@@ -1,7 +1,62 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
+  // Initialize formData correctly
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    role: "user", // Default role
+  });
+
+  const [error, setError] = useState("");
+
+  // Handle form field changes
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Handle form submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Check password match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    try {
+      // Send data to backend
+      const response = await axios.post("/api/auth/register", {
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+        role: formData.role,
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        // Navigate based on role
+        if (formData.role === "user") {
+          navigate("/landingPage");
+        } else if (formData.role === "admin" || formData.role === "manager") {
+          navigate("/dashboardPage");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message || "Signup failed. Please try again."
+      );
+    }
+  };
+
   return (
     <div
       style={{
@@ -21,47 +76,79 @@ const SignUp = () => {
         }}
       >
         <h3 className="text-center mb-4 text-brown">Sign Up</h3>
-        <form>
+
+        {/* Show error if any */}
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit}>
           <div className="form-group mb-3">
             <label>Email address</label>
             <input
               type="email"
+              name="email"
               className="form-control"
               placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
             />
           </div>
+
           <div className="form-group mb-3">
             <label>Password</label>
             <input
               type="password"
+              name="password"
               className="form-control"
               placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
             />
           </div>
+
           <div className="form-group mb-3">
             <label>Confirm Password</label>
             <input
               type="password"
+              name="confirmPassword"
               className="form-control"
               placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
             />
           </div>
+
           <div className="form-group mb-3">
             <label>Phone Number</label>
             <input
               type="text"
+              name="phone"
               className="form-control"
               placeholder="Enter your phone number"
+              value={formData.phone}
+              onChange={handleChange}
+              required
             />
           </div>
+
           <div className="form-group mb-4">
             <label>Role</label>
-            <select className="form-control">
+            <select
+              name="role"
+              className="form-control"
+              value={formData.role}
+              onChange={handleChange}
+              required
+            >
               <option value="user">User</option>
               <option value="admin">Admin</option>
               <option value="manager">Manager</option>
             </select>
           </div>
+
           <button type="submit" className="btn btn-brown w-100">
             Sign Up
           </button>

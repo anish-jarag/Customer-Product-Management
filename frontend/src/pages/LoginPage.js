@@ -13,7 +13,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Login user and get the token
       const { token } = await loginUser(email, password);
 
       if (token) {
@@ -24,7 +23,7 @@ const Login = () => {
 
         console.log(decoded);
 
-        if (userRole === "admin") {
+        if (userRole === "admin" || userRole === "manager") {
           navigate("/DashboardPage");
         } else {
           navigate("/LandingPage");
