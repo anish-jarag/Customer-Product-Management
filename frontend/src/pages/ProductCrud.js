@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Modal,
-  Button,
-  Form,
-  Table,
-  Pagination,
-  Spinner,
-  Container,
-  Row,
-  Col,
-} from "react-bootstrap";
+import { Modal, Button, Form } from "react-bootstrap";
 
 const ProductCrud = () => {
   const [products, setProducts] = useState([]);
@@ -28,9 +18,7 @@ const ProductCrud = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(5);
-  const [totalProducts, setTotalProducts] = useState(0);
 
-  // Color palette
   const colors = {
     primaryBrown: "#6b4226",
     lightBeige: "#f8f4e9",
@@ -39,85 +27,35 @@ const ProductCrud = () => {
     accentBrown: "#8b5a2b",
     textDark: "#3e3e3e",
     textLight: "#ffffff",
-    successGreen: "#4a8c5e",
-    warningOrange: "#e67e22",
-    dangerRed: "#c0392b",
   };
 
-  // Styles
-  const styles = {
-    container: {
-      backgroundColor: colors.lightBeige,
-      padding: "2rem",
-      borderRadius: "8px",
-      boxShadow: "0 4px 12px rgba(107, 66, 38, 0.1)",
-      marginTop: "2rem",
-    },
-    header: {
-      color: colors.primaryBrown,
-      fontWeight: "600",
-      marginBottom: "1.5rem",
-      borderBottom: `2px solid ${colors.mediumBeige}`,
-      paddingBottom: "0.5rem",
-    },
-    table: {
-      backgroundColor: colors.lightBeige,
-      borderColor: colors.mediumBeige,
-      borderRadius: "8px",
-      overflow: "hidden",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    },
-    tableHeader: {
+  const tableStyles = {
+    backgroundColor: colors.lightBeige,
+    borderColor: colors.mediumBeige,
+    borderRadius: "8px",
+    overflow: "hidden",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  };
+
+  const headerStyles = {
+    backgroundColor: colors.primaryBrown,
+    color: colors.textLight,
+    fontWeight: "500",
+    borderBottom: `1px solid ${colors.accentBrown}`,
+  };
+
+  const buttonStyles = {
+    primary: {
       backgroundColor: colors.primaryBrown,
-      color: colors.textLight,
+      borderColor: colors.primaryBrown,
       fontWeight: "500",
-      borderBottom: `1px solid ${colors.accentBrown}`,
+      letterSpacing: "0.5px",
     },
-    button: {
-      primary: {
-        backgroundColor: colors.primaryBrown,
-        borderColor: colors.primaryBrown,
-        fontWeight: "500",
-        letterSpacing: "0.5px",
-        ":hover": {
-          backgroundColor: colors.accentBrown,
-          borderColor: colors.accentBrown,
-        },
-      },
-      secondary: {
-        backgroundColor: colors.mediumBeige,
-        borderColor: colors.darkBeige,
-        color: colors.textDark,
-        fontWeight: "500",
-        ":hover": {
-          backgroundColor: colors.darkBeige,
-          borderColor: colors.accentBrown,
-        },
-      },
-      success: {
-        backgroundColor: colors.successGreen,
-        borderColor: colors.successGreen,
-      },
-      warning: {
-        backgroundColor: colors.warningOrange,
-        borderColor: colors.warningOrange,
-      },
-      danger: {
-        backgroundColor: colors.dangerRed,
-        borderColor: colors.dangerRed,
-      },
-    },
-    modalHeader: {
-      backgroundColor: colors.primaryBrown,
-      color: colors.textLight,
-    },
-    input: {
-      backgroundColor: colors.lightBeige,
-      borderColor: colors.mediumBeige,
-      ":focus": {
-        borderColor: colors.primaryBrown,
-        boxShadow: `0 0 0 0.2rem ${colors.mediumBeige}`,
-      },
+    secondary: {
+      backgroundColor: colors.mediumBeige,
+      borderColor: colors.darkBeige,
+      color: colors.textDark,
+      fontWeight: "500",
     },
   };
 
@@ -127,12 +65,10 @@ const ProductCrud = () => {
 
   const fetchProducts = async () => {
     try {
-      setLoading(true);
-      const res = await axios.get(
+      const res = await axios.get(process.env.REACT_APP_BASE_URL+
         `/api/products?page=${currentPage}&limit=${productsPerPage}`
       );
-      setProducts(res.data.data);
-      setTotalProducts(res.data.total || res.data.data.length);
+      setProducts(res.data.data); // Make sure your API returns { data: [...] }
       setLoading(false);
     } catch (err) {
       console.error("Error fetching products:", err);
@@ -143,17 +79,15 @@ const ProductCrud = () => {
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/products", formData);
+      const res = await axios.post(process.env.REACT_APP_BASE_URL+"/api/products", formData);
       setProducts([...products, res.data]);
       resetForm();
       setShowAddModal(false);
-      fetchProducts(); // Refresh the list
     } catch (err) {
       console.error("Failed to add product", err);
       alert(err.response?.data?.message || "Failed to add product");
     }
   };
-
   const handleEditProduct = (product) => {
     if (!product) return;
     setCurrentProduct(product);
@@ -170,7 +104,7 @@ const ProductCrud = () => {
     e.preventDefault();
     if (!currentProduct) return;
     try {
-      const res = await axios.put(
+      const res = await axios.put(process.env.REACT_APP_BASE_URL+
         `/api/products/${currentProduct._id}`,
         formData
       );
@@ -188,7 +122,7 @@ const ProductCrud = () => {
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
     try {
-      await axios.delete(`/api/products/${productToDelete._id}`);
+      await axios.delete(process.env.REACT_APP_BASE_URL+`/api/products/${productToDelete._id}`);
       setProducts(products.filter((p) => p._id !== productToDelete._id));
       setProductToDelete(null);
       setShowDeleteModal(false);
@@ -206,172 +140,87 @@ const ProductCrud = () => {
     });
   };
 
-  // Pagination logic
-  const totalPages = Math.ceil(totalProducts / productsPerPage);
-  const paginationItems = [];
-  for (let number = 1; number <= totalPages; number++) {
-    paginationItems.push(
-      <Pagination.Item
-        key={number}
-        active={number === currentPage}
-        onClick={() => setCurrentPage(number)}
-        style={{
-          backgroundColor:
-            number === currentPage ? colors.primaryBrown : colors.lightBeige,
-          borderColor: colors.mediumBeige,
-          color: number === currentPage ? colors.textLight : colors.textDark,
-        }}
-      >
-        {number}
-      </Pagination.Item>
-    );
-  }
-
   if (loading) {
     return (
-      <Container
-        className="d-flex justify-content-center align-items-center"
-        style={{ height: "100vh" }}
-      >
-        <Spinner
-          animation="border"
-          role="status"
-          style={{ color: colors.primaryBrown }}
-        >
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </Container>
+      <div className="text-center mt-5">
+        <div className="spinner-border text-primary" role="status"></div>
+        <p>Loading Products...</p>
+      </div>
     );
   }
 
   return (
-    <Container style={styles.container}>
-      <Row className="justify-content-between align-items-center mb-4">
-        <Col>
-          <h2 style={styles.header}>Manage Products</h2>
-        </Col>
-        <Col xs="auto">
-          <Button
-            variant="primary"
-            onClick={() => {
-              resetForm();
-              setShowAddModal(true);
-            }}
-            style={styles.button.primary}
-            className="shadow-sm"
-          >
-            <i className="bi bi-plus-circle me-2"></i>Add Product
-          </Button>
-        </Col>
-      </Row>
+    <div className="container">
+      <h2 className="mt-4" style={{ color: "#6b4226" }}>
+        Manage Products
+      </h2>
+
+      <div className="my-4">
+        <Button
+          variant="primary"
+          onClick={() => {
+            resetForm();
+            setShowAddModal(true);
+          }}
+          style={{ backgroundColor: "#6b4226", borderColor: "#6b4226" }}
+        >
+          ➕ Add Product
+        </Button>
+      </div>
 
       <div className="table-responsive">
-        <Table striped bordered hover style={styles.table}>
-          <thead style={styles.tableHeader}>
+        <table
+          className="table table-bordered"
+          style={{ backgroundColor: "#f5f5dc" }}
+        >
+          <thead style={{ backgroundColor: "#ffffff", color: "#6b4226" }}>
             <tr>
-              <th style={{ color: colors.textLight }}>Name</th>
-              <th style={{ color: colors.textLight }}>Code</th>
-              <th style={{ color: colors.textLight }}>Description</th>
-              <th style={{ color: colors.textLight }}>Status</th>
-              <th style={{ color: colors.textLight }}>Actions</th>
+              <th>ID</th>
+              <th>Product Name</th>
+              <th>Product Code</th>
+              <th>Description</th>
+              <th>Is Published</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {products.length > 0 ? (
-              products.map((product) => (
-                <tr key={product._id}>
-                  <td>{product.name}</td>
-                  <td>{product.productCode}</td>
-                  <td>{product.description || "-"}</td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        product.isPublished ? "bg-success" : "bg-secondary"
-                      }`}
-                      style={{
-                        backgroundColor: product.isPublished
-                          ? colors.successGreen
-                          : colors.mediumBeige,
-                        color: product.isPublished
-                          ? colors.textLight
-                          : colors.textDark,
-                      }}
-                    >
-                      {product.isPublished ? "Published" : "Draft"}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <Button
-                        variant="outline-warning"
-                        size="sm"
-                        onClick={() => handleEditProduct(product)}
-                        style={{
-                          color: colors.warningOrange,
-                          borderColor: colors.warningOrange,
-                        }}
-                      >
-                        <i className="bi bi-pencil-square me-1"></i>Edit
-                      </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => {
-                          setProductToDelete(product);
-                          setShowDeleteModal(true);
-                        }}
-                        style={{
-                          color: colors.dangerRed,
-                          borderColor: colors.dangerRed,
-                        }}
-                      >
-                        <i className="bi bi-trash me-1"></i>Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="text-center py-4">
-                  No products found. Add your first product!
+            {products.map((product) => (
+              <tr key={product._id}>
+                <td>{product._id}</td>
+                <td>{product.name}</td>
+                <td>{product.productCode}</td>
+                <td>{product.description}</td>
+                <td>{product.isPublished ? "Yes" : "No"}</td>
+                <td>
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => handleEditProduct(product)}
+                  >
+                    ✏️ Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      setProductToDelete(product);
+                      setShowDeleteModal(true);
+                    }}
+                  >
+                    🗑️ Delete
+                  </Button>
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
-        </Table>
+        </table>
       </div>
 
-      {totalProducts > productsPerPage && (
-        <div className="d-flex justify-content-center mt-4">
-          <Pagination>
-            <Pagination.Prev
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              style={{
-                backgroundColor: colors.lightBeige,
-                borderColor: colors.mediumBeige,
-              }}
-            />
-            {paginationItems}
-            <Pagination.Next
-              onClick={() =>
-                setCurrentPage(Math.min(totalPages, currentPage + 1))
-              }
-              disabled={currentPage === totalPages}
-              style={{
-                backgroundColor: colors.lightBeige,
-                borderColor: colors.mediumBeige,
-              }}
-            />
-          </Pagination>
-        </div>
-      )}
-
       {/* Add Product Modal */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
-        <Modal.Header closeButton style={styles.modalHeader}>
-          <Modal.Title>Add New Product</Modal.Title>
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleAddProduct}>
@@ -384,7 +233,6 @@ const ProductCrud = () => {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                style={styles.input}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formProductCode">
@@ -396,45 +244,39 @@ const ProductCrud = () => {
                   setFormData({ ...formData, productCode: e.target.value })
                 }
                 required
-                style={styles.input}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formDescription">
               <Form.Label>Description</Form.Label>
               <Form.Control
-                as="textarea"
-                rows={3}
+                type="text"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                style={styles.input}
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formIsPublished">
               <Form.Check
                 type="checkbox"
-                label="Publish this product"
+                label="Is Published"
                 checked={formData.isPublished}
                 onChange={(e) =>
                   setFormData({ ...formData, isPublished: e.target.checked })
                 }
               />
             </Form.Group>
-            <div className="d-flex justify-content-end gap-2">
+            <div className="d-flex justify-content-end">
               <Button
                 variant="secondary"
+                className="me-2"
                 onClick={() => setShowAddModal(false)}
-                style={styles.button.secondary}
               >
-                Cancel
+                Close
               </Button>
-              <Button
-                variant="primary"
-                type="submit"
-                style={styles.button.primary}
-              >
-                <i className="bi bi-save me-1"></i>Save Product
+              <Button variant="primary" type="submit">
+                Add Product
               </Button>
             </div>
           </Form>
@@ -442,12 +284,8 @@ const ProductCrud = () => {
       </Modal>
 
       {/* Edit Product Modal */}
-      <Modal
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
-        centered
-      >
-        <Modal.Header closeButton style={styles.modalHeader}>
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Modal.Header closeButton>
           <Modal.Title>Edit Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -461,7 +299,6 @@ const ProductCrud = () => {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                style={styles.input}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formProductCode">
@@ -473,45 +310,39 @@ const ProductCrud = () => {
                   setFormData({ ...formData, productCode: e.target.value })
                 }
                 required
-                style={styles.input}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formDescription">
               <Form.Label>Description</Form.Label>
               <Form.Control
-                as="textarea"
-                rows={3}
+                type="text"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                style={styles.input}
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formIsPublished">
               <Form.Check
                 type="checkbox"
-                label="Publish this product"
+                label="Is Published"
                 checked={formData.isPublished}
                 onChange={(e) =>
                   setFormData({ ...formData, isPublished: e.target.checked })
                 }
               />
             </Form.Group>
-            <div className="d-flex justify-content-end gap-2">
+            <div className="d-flex justify-content-end">
               <Button
                 variant="secondary"
+                className="me-2"
                 onClick={() => setShowEditModal(false)}
-                style={styles.button.secondary}
               >
-                Cancel
+                Close
               </Button>
-              <Button
-                variant="primary"
-                type="submit"
-                style={styles.button.primary}
-              >
-                <i className="bi bi-save me-1"></i>Update Product
+              <Button variant="primary" type="submit">
+                Update Product
               </Button>
             </div>
           </Form>
@@ -519,39 +350,21 @@ const ProductCrud = () => {
       </Modal>
 
       {/* Delete Product Modal */}
-      <Modal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        centered
-      >
-        <Modal.Header closeButton style={styles.modalHeader}>
-          <Modal.Title>Confirm Deletion</Modal.Title>
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Product</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <p>
-            Are you sure you want to delete{" "}
-            <strong>{productToDelete?.name}</strong>?
-          </p>
-          <p className="text-muted">This action cannot be undone.</p>
-        </Modal.Body>
+        <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowDeleteModal(false)}
-            style={styles.button.secondary}
-          >
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
             Cancel
           </Button>
-          <Button
-            variant="danger"
-            onClick={handleDeleteProduct}
-            style={styles.button.danger}
-          >
-            <i className="bi bi-trash me-1"></i>Delete
+          <Button variant="danger" onClick={handleDeleteProduct}>
+            Delete
           </Button>
         </Modal.Footer>
       </Modal>
-    </Container>
+    </div>
   );
 };
 

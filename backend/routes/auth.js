@@ -45,6 +45,7 @@ router.post("/login", async (req, res) => {
 // Register Route
 router.post("/register", async (req, res) => {
   const { name, email, password, role } = req.body;
+  // console.log(name, email, password, role);
 
   try {
     // Check if user already exists
@@ -82,7 +83,7 @@ router.post("/register", async (req, res) => {
       });
     });
   } catch (err) {
-    console.error(err.message);
+    console.error(err);
     res.status(500).send("Server error");
   }
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 const CustomerCRUD = () => {
@@ -6,37 +6,24 @@ const CustomerCRUD = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [sortBy] = useState("createdAt");
-  const [order, setOrder] = useState("descending");
+  const [order, setOrder] = useState("desc");
   const [loading, setLoading] = useState(true);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(""); // Success message state
+
   const [formData, setFormData] = useState({
     name: "",
     address: "",
     email: "",
     phone: "",
   });
+
   const [isEditing, setIsEditing] = useState(false);
+  const [editingCustomerId, setEditingCustomerId] = useState(null);
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`/api/customers`, {
-          params: { page, limit, sortBy, order },
-        });
-        setCustomers(res.data);
-      } catch (err) {
-        console.error("Failed to fetch customers", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCustomers();
-  }, [page, order, limit, sortBy]);
-
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await axios.get(`/api/customers`, {
         params: { page, limit, sortBy, order },
@@ -44,19 +31,31 @@ const CustomerCRUD = () => {
       setCustomers(res.data);
     } catch (err) {
       console.error("Failed to fetch customers", err);
+      setError("Failed to load customers. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, order, limit, sortBy]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();
+    setError(null);
+    setSuccessMessage(""); // Reset success message
     try {
       await axios.post("/api/customers", formData);
       setFormData({ name: "", address: "", email: "", phone: "" });
       fetchCustomers();
+      setSuccessMessage("Customer added successfully!"); // Set success message
     } catch (err) {
-      console.error("Failed to add customer", err);
+      console.error(
+        "Failed to add customer",
+        err.response?.data || err.message
+      );
+      setError(err.response?.data?.message || "Failed to add customer");
     }
   };
 
@@ -67,45 +66,54 @@ const CustomerCRUD = () => {
       email: customer.email,
       phone: customer.phone,
     });
-    setSelectedCustomer(customer);
+    setEditingCustomerId(customer._id);
     setIsEditing(true);
   };
 
   const handleUpdateCustomer = async (e) => {
     e.preventDefault();
+    setError(null);
+    setSuccessMessage(""); // Reset success message
     try {
-      await axios.put(`/api/customers/${selectedCustomer._id}`, formData);
+      await axios.put(`/api/customers/${editingCustomerId}`, formData);
       setFormData({ name: "", address: "", email: "", phone: "" });
-      setSelectedCustomer(null);
+      setEditingCustomerId(null);
       setIsEditing(false);
       fetchCustomers();
+      setSuccessMessage("Customer updated successfully!"); // Set success message
     } catch (err) {
-      console.error("Failed to update customer", err);
+      console.error(
+        "Failed to update customer",
+        err.response?.data || err.message
+      );
+      setError(err.response?.data?.message || "Failed to update customer");
     }
   };
 
   const handleDeleteCustomer = async (id) => {
     if (!window.confirm("Are you sure you want to delete this customer?"))
       return;
+
+    setError(null);
     try {
       await axios.delete(`/api/customers/${id}`);
-      fetchCustomers();
+      if (customers.length === 1 && page > 1) {
+        setPage(page - 1);
+      } else {
+        fetchCustomers();
+      }
+      setSuccessMessage("Customer deleted successfully!"); // Set success message on delete
     } catch (err) {
-      console.error("Failed to delete customer", err);
-    }
-  };
-
-  const handleViewDetails = async (id) => {
-    try {
-      const res = await axios.get(`/api/customers/${id}`);
-      setSelectedCustomer(res.data);
-    } catch (err) {
-      console.error("Failed to get customer details", err);
+      console.error(
+        "Failed to delete customer",
+        err.response?.data || err.message
+      );
+      setError(err.response?.data?.message || "Failed to delete customer");
     }
   };
 
   const toggleSortOrder = () => {
-    setOrder(order === "ascending" ? "descending" : "ascending");
+    setOrder(order === "asc" ? "desc" : "asc");
   };
 
   if (loading) {
@@ -113,177 +121,183 @@ const CustomerCRUD = () => {
   }
 
   return (
-    <div>
+    <div className="container mt-4">
       <h2 style={{ color: "#6b4226" }}>Manage Customers</h2>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="alert alert-success" role="alert">
+          {successMessage}
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
 
       {/* Add / Edit Form */}
       <form
         onSubmit={isEditing ? handleUpdateCustomer : handleAddCustomer}
-        className="mb-4"
+        className="mb-4 p-3 border rounded"
       >
-        <input
-          type="text"
-          placeholder="Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
-          className="form-control mb-2"
-        />
-        <input
-          type="text"
-          placeholder="Address"
-          value={formData.address}
-          onChange={(e) =>
-            setFormData({ ...formData, address: e.target.value })
-          }
-          className="form-control mb-2"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-          className="form-control mb-2"
-        />
-        <input
-          type="text"
-          placeholder="Phone"
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          className="form-control mb-2"
-        />
-        <button className="btn btn-success">
-          {isEditing ? "Update" : "Add"} Customer
-        </button>
+        <div className="row g-3">
+          <div className="col-md-6">
+            <label htmlFor="name" className="form-label">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              placeholder="Name"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              required
+              className="form-control"
+            />
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="email" className="form-label">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              required
+              className="form-control"
+            />
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="address" className="form-label">
+              Address
+            </label>
+            <input
+              type="text"
+              id="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={(e) =>
+                setFormData({ ...formData, address: e.target.value })
+              }
+              className="form-control"
+            />
+          </div>
+          <div className="col-md-6">
+            <label htmlFor="phone" className="form-label">
+              Phone
+            </label>
+            <input
+              type="text"
+              id="phone"
+              placeholder="Phone"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              className="form-control"
+            />
+          </div>
+          <div className="col-12">
+            <button className="btn btn-success me-2">
+              {isEditing ? "Update Customer" : "Add Customer"}
+            </button>
+            {isEditing && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditingCustomerId(null);
+                  setFormData({ name: "", address: "", email: "", phone: "" });
+                }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
       </form>
 
-      {/* Sorting Button */}
-      <div className="mb-3">
-        <button className="btn btn-secondary" onClick={toggleSortOrder}>
-          Sort by Created At ({order})
+      {/* Sorting and Pagination Controls */}
+      <div className="d-flex justify-content-between mb-3">
+        <button className="btn btn-outline-primary" onClick={toggleSortOrder}>
+          Sort by Date ({order === "asc" ? "↑ Oldest" : "↓ Newest"})
         </button>
+
+        <div className="d-flex align-items-center">
+          <button
+            className="btn btn-outline-primary me-2"
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
+            disabled={page === 1}
+          >
+            Previous
+          </button>
+          <span className="mx-2">Page {page}</span>
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={customers.length < limit}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Customers Table */}
       <div className="table-responsive">
-        <table
-          className="table table-bordered"
-          style={{ backgroundColor: "#f5f5dc" }}
-        >
-          <thead
-            className="thead-light"
-            style={{ backgroundColor: "#ffffff", color: "#6b4226" }}
-          >
+        <table className="table table-hover">
+          <thead className="table-light">
             <tr>
               <th>Name</th>
-              <th>Address</th>
               <th>Email</th>
               <th>Phone</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {customers.map((customer) => (
-              <tr key={customer._id}>
-                <td>{customer.name}</td>
-                <td>{customer.address}</td>
-                <td>{customer.email}</td>
-                <td>{customer.phone}</td>
-                <td>
-                  <button
-                    className="btn btn-sm btn-info me-2"
-                    onClick={() => handleViewDetails(customer._id)}
-                  >
-                    View
-                  </button>
-                  <button
-                    className="btn btn-sm btn-warning me-2"
-                    onClick={() => handleEditCustomer(customer)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDeleteCustomer(customer._id)}
-                  >
-                    Delete
-                  </button>
+            {customers.length > 0 ? (
+              customers.map((customer) => (
+                <tr key={customer._id}>
+                  <td>{customer.name}</td>
+                  <td>{customer.email}</td>
+                  <td>{customer.phone || "-"}</td>
+                  <td>
+                    <div className="d-flex gap-2">
+                      <button
+                        className="btn btn-sm btn-outline-warning"
+                        onClick={() => handleEditCustomer(customer)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDeleteCustomer(customer._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="text-center">
+                  No customers found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
-
-      {/* Pagination */}
-      <div className="d-flex justify-content-between align-items-center mt-4">
-        <button
-          className="btn btn-primary"
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-        >
-          Previous
-        </button>
-        <span>Page {page}</span>
-        <button
-          className="btn btn-primary"
-          onClick={() => setPage((prev) => prev + 1)}
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Customer Details Modal */}
-      {selectedCustomer && !isEditing && (
-        <div
-          className="modal show d-block"
-          tabIndex="-1"
-          role="dialog"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Customer Details</h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={() => setSelectedCustomer(null)}
-                >
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <p>
-                  <strong>Name:</strong> {selectedCustomer.name}
-                </p>
-                <p>
-                  <strong>Address:</strong> {selectedCustomer.address}
-                </p>
-                <p>
-                  <strong>Email:</strong> {selectedCustomer.email}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {selectedCustomer.phone}
-                </p>
-                <p>
-                  <strong>Created At:</strong>{" "}
-                  {new Date(selectedCustomer.createdAt).toLocaleString()}
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setSelectedCustomer(null)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

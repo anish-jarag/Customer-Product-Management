@@ -19,10 +19,10 @@ const ForgotPassword = () => {
           email,
         }
       );
-      setMessage(response.data.message);
+      setMessage(response.data.message); // Display success message from backend
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+        setError(err.response.data.message); // Display error message from backend
       } else {
         setError("Something went wrong. Please try again.");
       }

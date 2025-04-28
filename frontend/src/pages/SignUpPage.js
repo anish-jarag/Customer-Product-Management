@@ -34,7 +34,8 @@ const SignUp = () => {
 
     try {
       // Send data to backend
-      const response = await axios.post("/api/auth/register", {
+      const response = await axios.post(process.env.REACT_APP_BASE_URL+"/api/auth/register", {
+        name: formData.email,
         email: formData.email,
         password: formData.password,
         phone: formData.phone,

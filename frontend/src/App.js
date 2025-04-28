@@ -8,7 +8,6 @@ import AdminDashboard from "./pages/DashboardPage";
 import ProductDetails from "./pages/ProductDetailsPage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ProductCrud from "./pages/ProductCrud";
-import SettingsPage from "./pages/SettingsPage";
 import CustomerCRUD from "./pages/CustomerCURD";
 
 function App() {
@@ -22,7 +21,6 @@ function App() {
         <Route path="/DashboardPage" element={<AdminDashboard />} />
         <Route path="/products" element={<ProductCrud />} />
         <Route path="/ProductDetailsPage" element={<ProductDetails />} />
-        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/customers" element={<CustomerCRUD />} />
       </Routes>
     </Router>
