@@ -1,91 +1,71 @@
 import React from "react";
-import { FaUserCircle, FaSearch, FaShoppingCart, FaCog } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaUserCircle, FaSearch, FaShoppingCart, FaCog } from "react-icons/fa"; // Added FaCog
 
 const LandingPage = () => {
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }}>
+    <div style={{ background: "#f5f5dc", minHeight: "100vh" }}>
       {/* Header/Navbar */}
       <nav
         className="navbar navbar-expand-lg shadow"
         style={{ backgroundColor: "#fff8e1", padding: "1rem" }}
       >
         <div className="container-fluid d-flex align-items-center justify-content-between">
-          <div
+          <Link
             className="navbar-brand"
+            to="/"
             style={{
               fontFamily: "cursive",
               color: "#6b4226",
               fontSize: "1.8rem",
-              cursor: "default",
             }}
           >
             ShopiTech
-          </div>
+          </Link>
 
           <div className="d-flex gap-4">
-            <span
-              className="nav-link"
-              style={{ color: "#6b4226", cursor: "default" }}
-            >
+            <Link className="nav-link" to="/shop" style={{ color: "#6b4226" }}>
               Shop All
-            </span>
-            <span
+            </Link>
+            <Link
               className="nav-link"
-              style={{ color: "#6b4226", cursor: "default" }}
+              to="/mobiles"
+              style={{ color: "#6b4226" }}
             >
               Mobiles
-            </span>
-            <span
+            </Link>
+            <Link
               className="nav-link"
-              style={{ color: "#6b4226", cursor: "default" }}
+              to="/accessories"
+              style={{ color: "#6b4226" }}
             >
               Accessories
-            </span>
-            <span
-              className="nav-link"
-              style={{ color: "#6b4226", cursor: "default" }}
-            >
+            </Link>
+            <Link className="nav-link" to="/about" style={{ color: "#6b4226" }}>
               About Us
-            </span>
+            </Link>
           </div>
 
           <div className="d-flex gap-3">
-            <span
-              style={{
-                color: "#6b4226",
-                fontSize: "1.5rem",
-                cursor: "default",
-              }}
+            <Link
+              to="/profile"
+              style={{ color: "#6b4226", fontSize: "1.5rem" }}
             >
               <FaUserCircle />
-            </span>
-            <span
-              style={{
-                color: "#6b4226",
-                fontSize: "1.5rem",
-                cursor: "default",
-              }}
-            >
+            </Link>
+            <Link to="/search" style={{ color: "#6b4226", fontSize: "1.5rem" }}>
               <FaSearch />
-            </span>
-            <span
-              style={{
-                color: "#6b4226",
-                fontSize: "1.5rem",
-                cursor: "default",
-              }}
-            >
+            </Link>
+            <Link to="/cart" style={{ color: "#6b4226", fontSize: "1.5rem" }}>
               <FaShoppingCart />
-            </span>
-            <span
-              style={{
-                color: "#6b4226",
-                fontSize: "1.5rem",
-                cursor: "default",
-              }}
+            </Link>
+            <Link
+              to="/settings"
+              style={{ color: "#6b4226", fontSize: "1.5rem" }}
             >
               <FaCog />
-            </span>
+            </Link>{" "}
+            {/* New Settings Icon */}
           </div>
         </div>
       </nav>
@@ -93,7 +73,7 @@ const LandingPage = () => {
       {/* Body Section */}
       <div
         className="d-flex align-items-center justify-content-center"
-        style={{ height: "68vh" }}
+        style={{ height: "70vh" }}
       >
         <h1 style={{ color: "#6b4226", fontSize: "3rem" }}>
           Welcome to ShopiTech

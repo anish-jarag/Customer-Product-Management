@@ -8,7 +8,7 @@ const customerRoutes = require("./routes/customerRoutes");
 const productRoutes = require("./routes/products");
 const categoryRoutes = require("./routes/category");
 const forgotPasswordRoutes = require("./routes/forgotPassword");
-const siteSettingsRoutes = require("./routes/siteSettingsRoutes");
+const resetPasswordRoute = require("./routes/resetPassword");
 
 const app = express();
 app.use(cors());
@@ -20,7 +20,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/forgot-password", forgotPasswordRoutes);
-app.use("/api/settings", siteSettingsRoutes);
+app.use("/api/reset-password", resetPasswordRoute);
 
 // Default route
 app.get("/", (req, res) => {
