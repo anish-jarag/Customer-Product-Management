@@ -34,13 +34,16 @@ const SignUp = () => {
 
     try {
       // Send data to backend
-      const response = await axios.post(process.env.REACT_APP_BASE_URL+"/api/auth/register", {
-        name: formData.email,
-        email: formData.email,
-        password: formData.password,
-        phone: formData.phone,
-        role: formData.role,
-      });
+      const response = await axios.post(
+        process.env.REACT_APP_BASE_URL + "/api/auth/register",
+        {
+          name: formData.email,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          role: formData.role,
+        }
+      );
 
       if (response.status === 200 || response.status === 201) {
         // Navigate based on role
@@ -134,22 +137,6 @@ const SignUp = () => {
               required
             />
           </div>
-
-          <div className="form-group mb-4">
-            <label>Role</label>
-            <select
-              name="role"
-              className="form-control"
-              value={formData.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-              <option value="manager">Manager</option>
-            </select>
-          </div>
-
           <button type="submit" className="btn btn-brown w-100">
             Sign Up
           </button>
