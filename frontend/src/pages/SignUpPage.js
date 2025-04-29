@@ -59,27 +59,37 @@ const SignUp = () => {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(to left, #f5f5dc, #d2b48c)",
+        background: "radial-gradient(circle at top left, #F3F4F6, #FFFFFF)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        fontFamily: "Segoe UI, sans-serif",
       }}
     >
       <div
-        className="card shadow p-4"
+        className="shadow p-4"
         style={{
-          width: "24rem",
+          width: "100%",
+          maxWidth: "400px",
           borderRadius: "1rem",
-          backgroundColor: "#fff8dc",
+          backgroundColor: "#FFFFFF",
+          border: "1px solid #E5E7EB",
         }}
       >
-        <h3 className="text-center mb-4 text-brown">Sign Up</h3>
-        {error && <div className="alert alert-danger">{error}</div>}
+        <h3
+          className="text-center mb-4"
+          style={{ color: "#4B5563", fontWeight: 600 }}
+        >
+          Sign Up
+        </h3>
 
-        {/* Form */}
+        {error && (
+          <div className="alert alert-danger text-center py-2">{error}</div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group mb-3">
-            <label>Email address</label>
+            <label style={{ color: "#4B5563" }}>Email address</label>
             <input
               type="email"
               name="email"
@@ -88,11 +98,15 @@ const SignUp = () => {
               value={formData.email}
               onChange={handleChange}
               required
+              style={{
+                backgroundColor: "#F9FAFB",
+                borderColor: "#E5E7EB",
+              }}
             />
           </div>
 
           <div className="form-group mb-3">
-            <label>Password</label>
+            <label style={{ color: "#4B5563" }}>Password</label>
             <input
               type="password"
               name="password"
@@ -101,11 +115,15 @@ const SignUp = () => {
               value={formData.password}
               onChange={handleChange}
               required
+              style={{
+                backgroundColor: "#F9FAFB",
+                borderColor: "#E5E7EB",
+              }}
             />
           </div>
 
           <div className="form-group mb-3">
-            <label>Confirm Password</label>
+            <label style={{ color: "#4B5563" }}>Confirm Password</label>
             <input
               type="password"
               name="confirmPassword"
@@ -114,11 +132,15 @@ const SignUp = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
+              style={{
+                backgroundColor: "#F9FAFB",
+                borderColor: "#E5E7EB",
+              }}
             />
           </div>
 
-          <div className="form-group mb-3">
-            <label>Phone Number</label>
+          <div className="form-group mb-4">
+            <label style={{ color: "#4B5563" }}>Phone Number</label>
             <input
               type="text"
               name="phone"
@@ -127,9 +149,22 @@ const SignUp = () => {
               value={formData.phone}
               onChange={handleChange}
               required
+              style={{
+                backgroundColor: "#F9FAFB",
+                borderColor: "#E5E7EB",
+              }}
             />
           </div>
-          <button type="submit" className="btn btn-brown w-100">
+
+          <button
+            type="submit"
+            className="btn w-100"
+            style={{
+              backgroundColor: "#4B5563",
+              color: "#E5E7EB",
+              fontWeight: 500,
+            }}
+          >
             Sign Up
           </button>
         </form>

@@ -6,6 +6,7 @@ import ForgotPassword from "./pages/ForgotPasswordPage";
 import LandingPage from "./pages/LandingPage";
 import AdminDashboard from "./pages/DashboardPage";
 import ProductDetails from "./pages/ProductDetailsPage";
+import SettingsPage from "./pages/SettingsPage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ProductCrud from "./pages/ProductCrud";
 import CustomerCRUD from "./pages/CustomerCURD";
@@ -22,6 +23,7 @@ function App() {
         <Route path="/products" element={<ProductCrud />} />
         <Route path="/ProductDetailsPage" element={<ProductDetails />} />
         <Route path="/customers" element={<CustomerCRUD />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </Router>
   );

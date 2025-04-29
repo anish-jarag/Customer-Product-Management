@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 
 const ProductDetails = () => {
-  // Sample products - replace with backend API later
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    // Example: Simulating a fetch call
     const fetchProducts = async () => {
       const data = [
         {

@@ -3,111 +3,103 @@ import { FaUserCircle, FaSearch, FaShoppingCart, FaCog } from "react-icons/fa";
 
 const LandingPage = () => {
   return (
-    <div style={{ background: "#f5f5dc", minHeight: "100vh" }}>
-      {/* Header/Navbar */}
+    <div
+      style={{
+        background: "#FFFFFF",
+        minHeight: "100vh",
+        fontFamily: "sans-serif",
+      }}
+    >
+      {/* Navbar */}
       <nav
-        className="navbar navbar-expand-lg shadow"
-        style={{ backgroundColor: "#fff8e1", padding: "1rem" }}
+        className="navbar navbar-expand-lg shadow-sm"
+        style={{
+          backgroundColor: "#4B5563",
+          padding: "1rem 2rem",
+        }}
       >
         <div className="container-fluid d-flex align-items-center justify-content-between">
           <div
             className="navbar-brand"
             style={{
-              fontFamily: "cursive",
-              color: "#6b4226",
-              fontSize: "1.8rem",
-              cursor: "default",
+              color: "#E5E7EB",
+              fontSize: "2rem",
+              fontWeight: "bold",
+              letterSpacing: "1px",
             }}
           >
             ShopiTech
           </div>
 
           <div className="d-flex gap-4">
-            <span
-              className="nav-link"
-              style={{ color: "#6b4226", cursor: "default" }}
-            >
-              Shop All
-            </span>
-            <span
-              className="nav-link"
-              style={{ color: "#6b4226", cursor: "default" }}
-            >
-              Mobiles
-            </span>
-            <span
-              className="nav-link"
-              style={{ color: "#6b4226", cursor: "default" }}
-            >
-              Accessories
-            </span>
-            <span
-              className="nav-link"
-              style={{ color: "#6b4226", cursor: "default" }}
-            >
-              About Us
-            </span>
+            {["Shop All", "Mobiles", "Accessories", "About Us"].map(
+              (item, index) => (
+                <span
+                  key={index}
+                  className="nav-link"
+                  style={{
+                    color: "#E5E7EB",
+                    fontSize: "1rem",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  {item}
+                </span>
+              )
+            )}
           </div>
 
           <div className="d-flex gap-3">
-            <span
-              style={{
-                color: "#6b4226",
-                fontSize: "1.5rem",
-                cursor: "default",
-              }}
-            >
-              <FaUserCircle />
-            </span>
-            <span
-              style={{
-                color: "#6b4226",
-                fontSize: "1.5rem",
-                cursor: "default",
-              }}
-            >
-              <FaSearch />
-            </span>
-            <span
-              style={{
-                color: "#6b4226",
-                fontSize: "1.5rem",
-                cursor: "default",
-              }}
-            >
-              <FaShoppingCart />
-            </span>
-            <span
-              style={{
-                color: "#6b4226",
-                fontSize: "1.5rem",
-                cursor: "default",
-              }}
-            >
-              <FaCog />
-            </span>
+            {[FaUserCircle, FaSearch, FaShoppingCart, FaCog].map(
+              (Icon, idx) => (
+                <span
+                  key={idx}
+                  style={{
+                    color: "#E5E7EB",
+                    fontSize: "1.4rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Icon />
+                </span>
+              )
+            )}
           </div>
         </div>
       </nav>
 
-      {/* Body Section */}
+      {/* Hero Section */}
       <div
-        className="d-flex align-items-center justify-content-center"
-        style={{ height: "70vh" }}
+        className="d-flex align-items-center justify-content-center text-center"
+        style={{ height: "68vh", padding: "2rem" }}
       >
-        <h1 style={{ color: "#6b4226", fontSize: "3rem" }}>
-          Welcome to ShopiTech
-        </h1>
+        <div>
+          <h1
+            style={{ color: "#4B5563", fontSize: "3rem", fontWeight: "bold" }}
+          >
+            Welcome to ShopiTech
+          </h1>
+          <p
+            style={{ color: "#6B7280", fontSize: "1.25rem", marginTop: "1rem" }}
+          >
+            Your one-stop tech store – Explore gadgets, accessories, and more.
+          </p>
+        </div>
       </div>
 
       {/* Footer */}
       <footer
-        className="text-center p-4"
-        style={{ backgroundColor: "#fff8e1", color: "#6b4226" }}
+        className="text-center"
+        style={{
+          backgroundColor: "#4B5563",
+          color: "#E5E7EB",
+          padding: "1.5rem 1rem",
+        }}
       >
-        <p>Contact us: +91 9876543210</p>
-        <p>Email: support@shopitech.com</p>
-        <p>Address: Kolhapur, Maharashtra, India</p>
+        <p className="mb-1">📞 +91 9876543210</p>
+        <p className="mb-1">📧 support@shopitech.com</p>
+        <p>📍 Kolhapur, Maharashtra, India</p>
       </footer>
     </div>
   );

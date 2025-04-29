@@ -1,5 +1,13 @@
 import React from "react";
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import {
+  Navbar,
+  Nav,
+  Container,
+  Button,
+  Row,
+  Col,
+  Card,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
@@ -8,11 +16,14 @@ const AdminDashboard = () => {
   return (
     <div
       className="d-flex flex-column min-vh-100"
-      style={{ backgroundColor: "#f5f5dc" }}
+      style={{ backgroundColor: "#FFFFFF" }}
     >
-      <Navbar expand="lg" style={{ backgroundColor: "#a47551" }} variant="dark">
+      {/* Navbar */}
+      <Navbar expand="lg" style={{ backgroundColor: "#4B5563" }} variant="dark">
         <Container>
-          <Navbar.Brand className="fw-bold fs-3">Admin Panel</Navbar.Brand>
+          <Navbar.Brand className="fw-bold fs-3" style={{ color: "#E5E7EB" }}>
+            Admin Panel
+          </Navbar.Brand>
           <Nav className="ms-auto">
             <Button
               variant="outline-light"
@@ -38,18 +49,51 @@ const AdminDashboard = () => {
         </Container>
       </Navbar>
 
-      {/* Main Content */}
-      <Container
-        className="flex-grow-1 d-flex justify-content-center align-items-center"
-        style={{ color: "#5c4033" }}
-      >
-        <h1>Welcome to Admin Panel</h1>
+      {/* Main Dashboard Content */}
+      <Container className="flex-grow-1 py-5">
+        <h2 className="text-center mb-4" style={{ color: "#4B5563" }}>
+          Welcome to Admin Panel
+        </h2>
+        <Row className="g-4">
+          <Col md={3}>
+            <Card className="text-center shadow-sm border-0">
+              <Card.Body>
+                <h5 style={{ color: "#4B5563" }}>Revenue</h5>
+                <h3>$153,000</h3>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="text-center shadow-sm border-0">
+              <Card.Body>
+                <h5 style={{ color: "#4B5563" }}>Sales</h5>
+                <h3>20</h3>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="text-center shadow-sm border-0">
+              <Card.Body>
+                <h5 style={{ color: "#4B5563" }}>Customers</h5>
+                <h3>20</h3>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="text-center shadow-sm border-0">
+              <Card.Body>
+                <h5 style={{ color: "#4B5563" }}>Employees</h5>
+                <h3>20</h3>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       </Container>
 
       {/* Footer */}
       <footer
-        className="bg-brown text-center py-3"
-        style={{ backgroundColor: "#a47551", color: "white" }}
+        className="text-center py-3"
+        style={{ backgroundColor: "#4B5563", color: "#E5E7EB" }}
       >
         © 2025 Shopitech
       </footer>

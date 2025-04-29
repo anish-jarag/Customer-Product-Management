@@ -4,6 +4,7 @@ import { Modal, Button, Form, Badge, Pagination } from "react-bootstrap";
 import { FiEdit, FiTrash2, FiPlus, FiCheck, FiX } from "react-icons/fi";
 
 const ProductCrud = () => {
+  const API_BASE = process.env.REACT_APP_BASE_URL;
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -20,6 +21,7 @@ const ProductCrud = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(5);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [totalProducts, setTotalProducts] = useState(0);
 
   const colors = {
     primaryBrown: "#6b4226",
@@ -66,94 +68,120 @@ const ProductCrud = () => {
   }, [currentPage]);
 
   const fetchProducts = async () => {
+    setLoading(true);
     try {
-      const res = await axios.get(
-        process.env.REACT_APP_BASE_URL +
-          `/api/products?page=${currentPage}&limit=${productsPerPage}`
+      const { data } = await axios.get(
+        `${API_BASE}/api/products?page=${currentPage}&limit=${productsPerPage}`,
+        { timeout: 5000 }
       );
-      setProducts(res.data.data);
-      setLoading(false);
+
+      if (!data?.data) throw new Error("Invalid response structure");
+
+      setProducts(data.data);
+      setTotalProducts(data.totalCount || data.data.length);
     } catch (err) {
-      console.error("Error fetching products:", err);
+      console.error("Fetch error:", err);
+      alert(`Failed to load products: ${err.message}`);
+      setProducts([]);
+    } finally {
       setLoading(false);
     }
+  };
+
+  const openEditModal = (product) => {
+    setCurrentProduct(product);
+    setFormData({
+      name: product.name,
+      productCode: product.productCode,
+      description: product.description,
+      isPublished: product.isPublished,
+    });
+    setShowEditModal(true);
   };
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        process.env.REACT_APP_BASE_URL + "/api/products",
-        formData
-      );
+      const res = await axios.post(`${API_BASE}/api/products`, formData);
       setProducts([...products, res.data]);
       resetForm();
       setShowAddModal(false);
+      fetchProducts(); // Refresh the list to maintain pagination
     } catch (err) {
       console.error("Failed to add product", err);
       alert(err.response?.data?.message || "Failed to add product");
     }
   };
-  const handleEditProduct = async (e) => {
-    if (e && e.preventDefault) {
-      e.preventDefault();
-    }
-
-    try {
-      await axios.put(`/api/products/${formData.id}`, formData);
-
-      await fetchProducts();
-      setShowEditModal(false);
-    } catch (error) {
-      console.error("Error updating product:", error);
-    }
-  };
 
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
-    if (!currentProduct) return;
+    if (!currentProduct?._id) {
+      alert("No product selected for update.");
+      return;
+    }
+
+    setIsUpdating(true);
 
     try {
-      const res = await axios.put(
-        `${process.env.REACT_APP_API_URL}/products/${currentProduct._id}`,
-        formData,
+      const updateData = {
+        name: formData.name,
+        productCode: formData.productCode,
+        description: formData.description,
+        isPublished: formData.isPublished,
+      };
+
+      const response = await axios.put(
+        `${API_BASE}/api/products/${currentProduct._id}`,
+        updateData,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
+          timeout: 10000,
         }
       );
 
-      console.log("Update response:", res.data);
-
-      if (res.data && res.data._id) {
-        setProducts(
-          products.map((p) => (p._id === currentProduct._id ? res.data : p))
-        );
-        resetForm();
-        setCurrentProduct(null);
-        setShowEditModal(false);
-      } else {
-        console.error("Invalid response format:", res.data);
-        alert("Failed to update product: Invalid response from server");
+      if (!response.data?._id) {
+        throw new Error("Server didn't return updated product data");
       }
+
+      setProducts((prevProducts) =>
+        prevProducts.map((p) =>
+          p._id === currentProduct._id ? response.data : p
+        )
+      );
+
+      setShowEditModal(false);
+      resetForm();
+      setCurrentProduct(null);
     } catch (err) {
-      console.error("Failed to update product", err);
-      alert(err.response?.data?.message || "Failed to update product");
+      console.error("Update error:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to update product";
+      alert(`Update error: ${errorMessage}`);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
     try {
-      await axios.delete(
-        process.env.REACT_APP_BASE_URL + `/api/products/${productToDelete._id}`
-      );
+      await axios.delete(`${API_BASE}/api/products/${productToDelete._id}`);
       setProducts(products.filter((p) => p._id !== productToDelete._id));
+
+      // Handle pagination when deleting the last item on a page
+      if (products.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      } else {
+        fetchProducts();
+      }
+
       setProductToDelete(null);
       setShowDeleteModal(false);
     } catch (err) {
       console.error("Failed to delete product", err);
+      alert("Failed to delete product");
     }
   };
 
@@ -212,76 +240,86 @@ const ProductCrud = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
-                  <tr
-                    key={product._id}
-                    style={{ borderBottom: `1px solid ${colors.mediumBeige}` }}
-                  >
-                    <td style={{ color: colors.textDark }}>
-                      {product._id.slice(-6)}
-                    </td>
-                    <td style={{ color: colors.textDark, fontWeight: "500" }}>
-                      {product.name}
-                    </td>
-                    <td style={{ color: colors.accentBrown }}>
-                      {product.productCode}
-                    </td>
-                    <td style={{ color: colors.textDark }}>
-                      {product.description || (
-                        <span style={{ color: colors.darkBeige }}>
-                          No description
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <Badge
-                        pill
-                        bg={product.isPublished ? "success" : "secondary"}
-                        style={{ fontWeight: "normal" }}
-                      >
-                        {product.isPublished ? (
-                          <>
-                            <FiCheck className="me-1" /> Published
-                          </>
-                        ) : (
-                          <>
-                            <FiX className="me-1" /> Draft
-                          </>
+                {products.length > 0 ? (
+                  products.map((product) => (
+                    <tr
+                      key={product._id}
+                      style={{
+                        borderBottom: `1px solid ${colors.mediumBeige}`,
+                      }}
+                    >
+                      <td style={{ color: colors.textDark }}>
+                        {product._id.slice(-6)}
+                      </td>
+                      <td style={{ color: colors.textDark, fontWeight: "500" }}>
+                        {product.name}
+                      </td>
+                      <td style={{ color: colors.accentBrown }}>
+                        {product.productCode}
+                      </td>
+                      <td style={{ color: colors.textDark }}>
+                        {product.description || (
+                          <span style={{ color: colors.darkBeige }}>
+                            No description
+                          </span>
                         )}
-                      </Badge>
-                    </td>
-                    <td>
-                      <div className="d-flex">
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          className="me-2"
-                          onClick={() => handleEditProduct(product)}
-                          style={{
-                            borderColor: colors.primaryBrown,
-                            color: colors.primaryBrown,
-                          }}
+                      </td>
+                      <td>
+                        <Badge
+                          pill
+                          bg={product.isPublished ? "success" : "secondary"}
+                          style={{ fontWeight: "normal" }}
                         >
-                          <FiEdit />
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => {
-                            setProductToDelete(product);
-                            setShowDeleteModal(true);
-                          }}
-                          style={{
-                            borderColor: "#dc3545",
-                            color: "#dc3545",
-                          }}
-                        >
-                          <FiTrash2 />
-                        </Button>
-                      </div>
+                          {product.isPublished ? (
+                            <>
+                              <FiCheck className="me-1" /> Published
+                            </>
+                          ) : (
+                            <>
+                              <FiX className="me-1" /> Draft
+                            </>
+                          )}
+                        </Badge>
+                      </td>
+                      <td>
+                        <div className="d-flex">
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => openEditModal(product)}
+                            style={{
+                              borderColor: colors.primaryBrown,
+                              color: colors.primaryBrown,
+                            }}
+                          >
+                            <FiEdit />
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => {
+                              setProductToDelete(product);
+                              setShowDeleteModal(true);
+                            }}
+                            style={{
+                              borderColor: "#dc3545",
+                              color: "#dc3545",
+                            }}
+                          >
+                            <FiTrash2 />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4">
+                      No products found
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -289,29 +327,33 @@ const ProductCrud = () => {
       </div>
 
       {/* Pagination */}
-      <div className="d-flex justify-content-center mt-4">
-        <Pagination>
-          <Pagination.Prev
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-          />
-          {[...Array(Math.ceil(products.length / productsPerPage)).keys()].map(
-            (number) => (
-              <Pagination.Item
-                key={number + 1}
-                active={number + 1 === currentPage}
-                onClick={() => setCurrentPage(number + 1)}
-              >
-                {number + 1}
-              </Pagination.Item>
-            )
-          )}
-          <Pagination.Next
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={products.length < productsPerPage}
-          />
-        </Pagination>
-      </div>
+      {totalProducts > productsPerPage && (
+        <div className="d-flex justify-content-center mt-4">
+          <Pagination>
+            <Pagination.Prev
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            />
+            {[...Array(Math.ceil(totalProducts / productsPerPage)).keys()].map(
+              (number) => (
+                <Pagination.Item
+                  key={number + 1}
+                  active={number + 1 === currentPage}
+                  onClick={() => setCurrentPage(number + 1)}
+                >
+                  {number + 1}
+                </Pagination.Item>
+              )
+            )}
+            <Pagination.Next
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={
+                currentPage >= Math.ceil(totalProducts / productsPerPage)
+              }
+            />
+          </Pagination>
+        </div>
+      )}
 
       {/* Add Product Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
@@ -413,7 +455,10 @@ const ProductCrud = () => {
       {/* Edit Product Modal */}
       <Modal
         show={showEditModal}
-        onHide={() => setShowEditModal(false)}
+        onHide={() => {
+          setShowEditModal(false);
+          resetForm();
+        }}
         centered
       >
         <Modal.Header
@@ -526,6 +571,7 @@ const ProductCrud = () => {
           </Form>
         </Modal.Body>
       </Modal>
+
       {/* Delete Product Modal */}
       <Modal
         show={showDeleteModal}

@@ -1,12 +1,34 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getSiteSettings, updateSiteSettings } = require("../controllers/siteSettingsController");
-const { protect, adminOnly } = require("../middleware/authMiddleware"); 
+const {
+  getSiteSettings,
+  updateSiteSettings,
+} = require("../controllers/siteSettingsController");
+const { getSettings, updateSettings } = require("../models/siteSettingsModel");
 
-// Public can view settings
 router.get("/", getSiteSettings);
-
-// Only Admin can update settings
 router.put("/", updateSiteSettings);
+router.get("/", async (req, res) => {
+  try {
+    const settings = await Settings.findOne();
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch settings" });
+  }
+});
+
+router.put("/", async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) settings = new Settings();
+    settings.theme = req.body.theme || settings.theme;
+    settings.allowRegistration =
+      req.body.allowRegistration ?? settings.allowRegistration;
+    await settings.save();
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update settings" });
+  }
+});
 
 module.exports = router;

@@ -121,93 +121,151 @@ const CustomerCRUD = () => {
   }
 
   return (
-    <div className="container mt-4">
-      <h2 style={{ color: "#6b4226" }}>Manage Customers</h2>
+    <div
+      className="container py-5"
+      style={{ backgroundColor: "#F9FAFB", minHeight: "100vh" }}
+    >
+      <h2 style={{ color: "#4B5563", fontWeight: "600", marginBottom: "24px" }}>
+        Manage Customers
+      </h2>
 
       {/* Success Message */}
       {successMessage && (
-        <div className="alert alert-success" role="alert">
+        <div className="alert alert-success text-dark" role="alert">
           {successMessage}
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger text-dark" role="alert">
           {error}
         </div>
       )}
 
-      {/* Add / Edit Form */}
+      {/* Form */}
       <form
         onSubmit={isEditing ? handleUpdateCustomer : handleAddCustomer}
-        className="mb-4 p-3 border rounded"
+        className="mb-4 p-4 border rounded"
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderColor: "#D1D5DB",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
+        }}
       >
         <div className="row g-3">
           <div className="col-md-6">
-            <label htmlFor="name" className="form-label">
+            <label
+              htmlFor="name"
+              className="form-label"
+              style={{ color: "#4B5563" }}
+            >
               Name
             </label>
             <input
               type="text"
               id="name"
-              placeholder="Name"
+              placeholder="Enter full name"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
               required
               className="form-control"
+              style={{
+                backgroundColor: "#FFFFFF",
+                color: "#4B5563",
+                borderColor: "#D1D5DB",
+              }}
             />
           </div>
+
           <div className="col-md-6">
-            <label htmlFor="email" className="form-label">
+            <label
+              htmlFor="email"
+              className="form-label"
+              style={{ color: "#4B5563" }}
+            >
               Email
             </label>
             <input
               type="email"
               id="email"
-              placeholder="Email"
+              placeholder="Enter email address"
               value={formData.email}
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
               required
               className="form-control"
+              style={{
+                backgroundColor: "#FFFFFF",
+                color: "#4B5563",
+                borderColor: "#D1D5DB",
+              }}
             />
           </div>
+
           <div className="col-md-6">
-            <label htmlFor="address" className="form-label">
+            <label
+              htmlFor="address"
+              className="form-label"
+              style={{ color: "#4B5563" }}
+            >
               Address
             </label>
             <input
               type="text"
               id="address"
-              placeholder="Address"
+              placeholder="Enter address"
               value={formData.address}
               onChange={(e) =>
                 setFormData({ ...formData, address: e.target.value })
               }
               className="form-control"
+              style={{
+                backgroundColor: "#FFFFFF",
+                color: "#4B5563",
+                borderColor: "#D1D5DB",
+              }}
             />
           </div>
+
           <div className="col-md-6">
-            <label htmlFor="phone" className="form-label">
+            <label
+              htmlFor="phone"
+              className="form-label"
+              style={{ color: "#4B5563" }}
+            >
               Phone
             </label>
             <input
               type="text"
               id="phone"
-              placeholder="Phone"
+              placeholder="Enter phone number"
               value={formData.phone}
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
               className="form-control"
+              style={{
+                backgroundColor: "#FFFFFF",
+                color: "#4B5563",
+                borderColor: "#D1D5DB",
+              }}
             />
           </div>
-          <div className="col-12">
-            <button className="btn btn-success me-2">
+
+          <div className="col-12 d-flex gap-2">
+            <button
+              className="btn"
+              style={{
+                backgroundColor: "#4B5563",
+                color: "#FFFFFF",
+                borderColor: "#4B5563",
+                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+              }}
+            >
               {isEditing ? "Update Customer" : "Add Customer"}
             </button>
             {isEditing && (
@@ -219,6 +277,10 @@ const CustomerCRUD = () => {
                   setEditingCustomerId(null);
                   setFormData({ name: "", address: "", email: "", phone: "" });
                 }}
+                style={{
+                  borderColor: "#D1D5DB",
+                  color: "#4B5563",
+                }}
               >
                 Cancel
               </button>
@@ -227,23 +289,38 @@ const CustomerCRUD = () => {
         </div>
       </form>
 
-      {/* Sorting and Pagination Controls */}
-      <div className="d-flex justify-content-between mb-3">
-        <button className="btn btn-outline-primary" onClick={toggleSortOrder}>
+      {/* Sorting & Pagination */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <button
+          className="btn btn-outline-dark"
+          style={{
+            borderColor: "#4B5563",
+            color: "#4B5563",
+          }}
+          onClick={toggleSortOrder}
+        >
           Sort by Date ({order === "asc" ? "↑ Oldest" : "↓ Newest"})
         </button>
 
-        <div className="d-flex align-items-center">
+        <div className="d-flex align-items-center gap-2">
           <button
-            className="btn btn-outline-primary me-2"
+            className="btn btn-outline-dark"
+            style={{
+              borderColor: "#4B5563",
+              color: "#4B5563",
+            }}
             onClick={() => setPage((p) => Math.max(p - 1, 1))}
             disabled={page === 1}
           >
             Previous
           </button>
-          <span className="mx-2">Page {page}</span>
+          <span style={{ color: "#4B5563" }}>Page {page}</span>
           <button
-            className="btn btn-outline-primary"
+            className="btn btn-outline-dark"
+            style={{
+              borderColor: "#4B5563",
+              color: "#4B5563",
+            }}
             onClick={() => setPage((p) => p + 1)}
             disabled={customers.length < limit}
           >
@@ -252,10 +329,10 @@ const CustomerCRUD = () => {
         </div>
       </div>
 
-      {/* Customers Table */}
+      {/* Table */}
       <div className="table-responsive">
         <table className="table table-hover">
-          <thead className="table-light">
+          <thead style={{ backgroundColor: "#4B5563", color: "#E5E7EB" }}>
             <tr>
               <th>Name</th>
               <th>Email</th>
@@ -275,13 +352,21 @@ const CustomerCRUD = () => {
                   <td>
                     <div className="d-flex gap-2">
                       <button
-                        className="btn btn-sm btn-outline-warning"
+                        className="btn btn-sm"
+                        style={{
+                          borderColor: "#FBBF24",
+                          color: "#FBBF24",
+                        }}
                         onClick={() => handleEditCustomer(customer)}
                       >
                         Edit
                       </button>
                       <button
-                        className="btn btn-sm btn-outline-danger"
+                        className="btn btn-sm"
+                        style={{
+                          borderColor: "#EF4444",
+                          color: "#EF4444",
+                        }}
                         onClick={() => handleDeleteCustomer(customer._id)}
                       >
                         Delete
@@ -292,7 +377,7 @@ const CustomerCRUD = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="text-center">
+                <td colSpan="5" className="text-center text-muted">
                   No customers found.
                 </td>
               </tr>
