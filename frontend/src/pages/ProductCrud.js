@@ -166,6 +166,8 @@ const ProductCrud = () => {
     });
   };
 
+  const [isUpdating, setIsUpdating] = useState(false);
+
   if (loading) {
     return (
       <div className="text-center mt-5">
@@ -174,7 +176,6 @@ const ProductCrud = () => {
       </div>
     );
   }
-  const [isUpdating, setIsUpdating] = useState(false);
 
   return (
     <div className="container py-4" style={{ maxWidth: "1200px" }}>
