@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Badge, Pagination } from "react-bootstrap";
+import { FiEdit, FiTrash2, FiPlus, FiCheck, FiX } from "react-icons/fi";
 
 const ProductCrud = () => {
   const [products, setProducts] = useState([]);
@@ -65,8 +66,9 @@ const ProductCrud = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(process.env.REACT_APP_BASE_URL+
-        `/api/products?page=${currentPage}&limit=${productsPerPage}`
+      const res = await axios.get(
+        process.env.REACT_APP_BASE_URL +
+          `/api/products?page=${currentPage}&limit=${productsPerPage}`
       );
       setProducts(res.data.data); // Make sure your API returns { data: [...] }
       setLoading(false);
@@ -79,7 +81,10 @@ const ProductCrud = () => {
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(process.env.REACT_APP_BASE_URL+"/api/products", formData);
+      const res = await axios.post(
+        process.env.REACT_APP_BASE_URL + "/api/products",
+        formData
+      );
       setProducts([...products, res.data]);
       resetForm();
       setShowAddModal(false);
@@ -88,41 +93,62 @@ const ProductCrud = () => {
       alert(err.response?.data?.message || "Failed to add product");
     }
   };
-  const handleEditProduct = (product) => {
-    if (!product) return;
-    setCurrentProduct(product);
-    setFormData({
-      name: product.name,
-      productCode: product.productCode,
-      description: product.description,
-      isPublished: product.isPublished,
-    });
-    setShowEditModal(true);
+  const handleEditProduct = async (e) => {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+
+    try {
+      await axios.put(`/api/products/${formData.id}`, formData);
+
+      await fetchProducts();
+      setShowEditModal(false);
+    } catch (error) {
+      console.error("Error updating product:", error);
+    }
   };
 
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
     if (!currentProduct) return;
+
     try {
-      const res = await axios.put(process.env.REACT_APP_BASE_URL+
-        `/api/products/${currentProduct._id}`,
-        formData
+      const res = await axios.put(
+        `${process.env.REACT_APP_API_URL}/products/${currentProduct._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
-      setProducts(
-        products.map((p) => (p._id === currentProduct._id ? res.data : p))
-      );
-      resetForm();
-      setCurrentProduct(null);
-      setShowEditModal(false);
+
+      // Verify the response structure
+      console.log("Update response:", res.data);
+
+      if (res.data && res.data._id) {
+        setProducts(
+          products.map((p) => (p._id === currentProduct._id ? res.data : p))
+        );
+        resetForm();
+        setCurrentProduct(null);
+        setShowEditModal(false);
+      } else {
+        console.error("Invalid response format:", res.data);
+        alert("Failed to update product: Invalid response from server");
+      }
     } catch (err) {
       console.error("Failed to update product", err);
+      alert(err.response?.data?.message || "Failed to update product");
     }
   };
 
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
     try {
-      await axios.delete(process.env.REACT_APP_BASE_URL+`/api/products/${productToDelete._id}`);
+      await axios.delete(
+        process.env.REACT_APP_BASE_URL + `/api/products/${productToDelete._id}`
+      );
       setProducts(products.filter((p) => p._id !== productToDelete._id));
       setProductToDelete(null);
       setShowDeleteModal(false);
@@ -148,84 +174,164 @@ const ProductCrud = () => {
       </div>
     );
   }
+  const [isUpdating, setIsUpdating] = useState(false);
 
   return (
-    <div className="container">
-      <h2 className="mt-4" style={{ color: "#6b4226" }}>
-        Manage Products
-      </h2>
-
-      <div className="my-4">
+    <div className="container py-4" style={{ maxWidth: "1200px" }}>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="m-0" style={{ color: colors.primaryBrown }}>
+          Product Management
+        </h2>
         <Button
           variant="primary"
           onClick={() => {
             resetForm();
             setShowAddModal(true);
           }}
-          style={{ backgroundColor: "#6b4226", borderColor: "#6b4226" }}
+          style={buttonStyles.primary}
         >
-          ➕ Add Product
+          <FiPlus className="me-2" />
+          Add Product
         </Button>
       </div>
 
-      <div className="table-responsive">
-        <table
-          className="table table-bordered"
-          style={{ backgroundColor: "#f5f5dc" }}
-        >
-          <thead style={{ backgroundColor: "#ffffff", color: "#6b4226" }}>
-            <tr>
-              <th>ID</th>
-              <th>Product Name</th>
-              <th>Product Code</th>
-              <th>Description</th>
-              <th>Is Published</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product._id}>
-                <td>{product._id}</td>
-                <td>{product.name}</td>
-                <td>{product.productCode}</td>
-                <td>{product.description}</td>
-                <td>{product.isPublished ? "Yes" : "No"}</td>
-                <td>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleEditProduct(product)}
+      <div
+        className="card border-0"
+        style={{ backgroundColor: colors.lightBeige }}
+      >
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table mb-0" style={tableStyles}>
+              <thead>
+                <tr>
+                  <th style={headerStyles}>ID</th>
+                  <th style={headerStyles}>Product Name</th>
+                  <th style={headerStyles}>Code</th>
+                  <th style={headerStyles}>Description</th>
+                  <th style={headerStyles}>Status</th>
+                  <th style={headerStyles}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product) => (
+                  <tr
+                    key={product._id}
+                    style={{ borderBottom: `1px solid ${colors.mediumBeige}` }}
                   >
-                    ✏️ Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      setProductToDelete(product);
-                      setShowDeleteModal(true);
-                    }}
-                  >
-                    🗑️ Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    <td style={{ color: colors.textDark }}>
+                      {product._id.slice(-6)}
+                    </td>
+                    <td style={{ color: colors.textDark, fontWeight: "500" }}>
+                      {product.name}
+                    </td>
+                    <td style={{ color: colors.accentBrown }}>
+                      {product.productCode}
+                    </td>
+                    <td style={{ color: colors.textDark }}>
+                      {product.description || (
+                        <span style={{ color: colors.darkBeige }}>
+                          No description
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <Badge
+                        pill
+                        bg={product.isPublished ? "success" : "secondary"}
+                        style={{ fontWeight: "normal" }}
+                      >
+                        {product.isPublished ? (
+                          <>
+                            <FiCheck className="me-1" /> Published
+                          </>
+                        ) : (
+                          <>
+                            <FiX className="me-1" /> Draft
+                          </>
+                        )}
+                      </Badge>
+                    </td>
+                    <td>
+                      <div className="d-flex">
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => handleEditProduct(product)}
+                          style={{
+                            borderColor: colors.primaryBrown,
+                            color: colors.primaryBrown,
+                          }}
+                        >
+                          <FiEdit />
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => {
+                            setProductToDelete(product);
+                            setShowDeleteModal(true);
+                          }}
+                          style={{
+                            borderColor: "#dc3545",
+                            color: "#dc3545",
+                          }}
+                        >
+                          <FiTrash2 />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div className="d-flex justify-content-center mt-4">
+        <Pagination>
+          <Pagination.Prev
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+          />
+          {[...Array(Math.ceil(products.length / productsPerPage)).keys()].map(
+            (number) => (
+              <Pagination.Item
+                key={number + 1}
+                active={number + 1 === currentPage}
+                onClick={() => setCurrentPage(number + 1)}
+              >
+                {number + 1}
+              </Pagination.Item>
+            )
+          )}
+          <Pagination.Next
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={products.length < productsPerPage}
+          />
+        </Pagination>
       </div>
 
       {/* Add Product Modal */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add Product</Modal.Title>
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
+        <Modal.Header
+          closeButton
+          style={{
+            backgroundColor: colors.primaryBrown,
+            color: colors.textLight,
+            borderBottom: `1px solid ${colors.accentBrown}`,
+          }}
+        >
+          <Modal.Title>Add New Product</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{ backgroundColor: colors.lightBeige }}>
           <Form onSubmit={handleAddProduct}>
             <Form.Group className="mb-3" controlId="formName">
-              <Form.Label>Product Name</Form.Label>
+              <Form.Label style={{ color: colors.textDark }}>
+                Product Name
+              </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.name}
@@ -233,10 +339,16 @@ const ProductCrud = () => {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
+                style={{
+                  backgroundColor: colors.textLight,
+                  borderColor: colors.mediumBeige,
+                }}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formProductCode">
-              <Form.Label>Product Code</Form.Label>
+              <Form.Label style={{ color: colors.textDark }}>
+                Product Code
+              </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.productCode}
@@ -244,27 +356,38 @@ const ProductCrud = () => {
                   setFormData({ ...formData, productCode: e.target.value })
                 }
                 required
+                style={{
+                  backgroundColor: colors.textLight,
+                  borderColor: colors.mediumBeige,
+                }}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formDescription">
-              <Form.Label>Description</Form.Label>
+              <Form.Label style={{ color: colors.textDark }}>
+                Description
+              </Form.Label>
               <Form.Control
-                type="text"
+                as="textarea"
+                rows={3}
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                required
+                style={{
+                  backgroundColor: colors.textLight,
+                  borderColor: colors.mediumBeige,
+                }}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formIsPublished">
               <Form.Check
                 type="checkbox"
-                label="Is Published"
+                label="Publish this product"
                 checked={formData.isPublished}
                 onChange={(e) =>
                   setFormData({ ...formData, isPublished: e.target.checked })
                 }
+                style={{ color: colors.textDark }}
               />
             </Form.Group>
             <div className="d-flex justify-content-end">
@@ -272,11 +395,16 @@ const ProductCrud = () => {
                 variant="secondary"
                 className="me-2"
                 onClick={() => setShowAddModal(false)}
+                style={buttonStyles.secondary}
               >
-                Close
+                Cancel
               </Button>
-              <Button variant="primary" type="submit">
-                Add Product
+              <Button
+                variant="primary"
+                type="submit"
+                style={buttonStyles.primary}
+              >
+                Create Product
               </Button>
             </div>
           </Form>
@@ -284,14 +412,28 @@ const ProductCrud = () => {
       </Modal>
 
       {/* Edit Product Modal */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-        <Modal.Header closeButton>
+      {/* Edit Product Modal */}
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        centered
+      >
+        <Modal.Header
+          closeButton
+          style={{
+            backgroundColor: colors.primaryBrown,
+            color: colors.textLight,
+            borderBottom: `1px solid ${colors.accentBrown}`,
+          }}
+        >
           <Modal.Title>Edit Product</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{ backgroundColor: colors.lightBeige }}>
           <Form onSubmit={handleUpdateProduct}>
-            <Form.Group className="mb-3" controlId="formName">
-              <Form.Label>Product Name</Form.Label>
+            <Form.Group className="mb-3" controlId="editFormName">
+              <Form.Label style={{ color: colors.textDark }}>
+                Product Name
+              </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.name}
@@ -299,10 +441,16 @@ const ProductCrud = () => {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
+                style={{
+                  backgroundColor: colors.textLight,
+                  borderColor: colors.mediumBeige,
+                }}
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="formProductCode">
-              <Form.Label>Product Code</Form.Label>
+            <Form.Group className="mb-3" controlId="editFormProductCode">
+              <Form.Label style={{ color: colors.textDark }}>
+                Product Code
+              </Form.Label>
               <Form.Control
                 type="text"
                 value={formData.productCode}
@@ -310,57 +458,119 @@ const ProductCrud = () => {
                   setFormData({ ...formData, productCode: e.target.value })
                 }
                 required
+                style={{
+                  backgroundColor: colors.textLight,
+                  borderColor: colors.mediumBeige,
+                }}
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="formDescription">
-              <Form.Label>Description</Form.Label>
+            <Form.Group className="mb-3" controlId="editFormDescription">
+              <Form.Label style={{ color: colors.textDark }}>
+                Description
+              </Form.Label>
               <Form.Control
-                type="text"
+                as="textarea"
+                rows={3}
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                required
+                style={{
+                  backgroundColor: colors.textLight,
+                  borderColor: colors.mediumBeige,
+                }}
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="formIsPublished">
+            <Form.Group className="mb-3" controlId="editFormIsPublished">
               <Form.Check
                 type="checkbox"
-                label="Is Published"
+                label="Publish this product"
                 checked={formData.isPublished}
                 onChange={(e) =>
                   setFormData({ ...formData, isPublished: e.target.checked })
                 }
+                style={{ color: colors.textDark }}
               />
             </Form.Group>
             <div className="d-flex justify-content-end">
               <Button
                 variant="secondary"
                 className="me-2"
-                onClick={() => setShowEditModal(false)}
+                onClick={() => {
+                  setShowEditModal(false);
+                  resetForm();
+                }}
+                style={buttonStyles.secondary}
+                disabled={isUpdating}
               >
-                Close
+                Cancel
               </Button>
-              <Button variant="primary" type="submit">
-                Update Product
+              <Button
+                variant="primary"
+                type="submit"
+                style={buttonStyles.primary}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Updating...
+                  </>
+                ) : (
+                  "Update Product"
+                )}
               </Button>
             </div>
           </Form>
         </Modal.Body>
       </Modal>
-
       {/* Delete Product Modal */}
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Delete Product</Modal.Title>
+      <Modal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        centered
+      >
+        <Modal.Header
+          closeButton
+          style={{
+            backgroundColor: colors.primaryBrown,
+            color: colors.textLight,
+            borderBottom: `1px solid ${colors.accentBrown}`,
+          }}
+        >
+          <Modal.Title>Confirm Deletion</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+        <Modal.Body
+          style={{ backgroundColor: colors.lightBeige, color: colors.textDark }}
+        >
+          <p>
+            Are you sure you want to delete{" "}
+            <strong>{productToDelete?.name}</strong>?
+          </p>
+          <p>This action cannot be undone.</p>
+        </Modal.Body>
+        <Modal.Footer style={{ backgroundColor: colors.lightBeige }}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDeleteModal(false)}
+            style={buttonStyles.secondary}
+          >
             Cancel
           </Button>
-          <Button variant="danger" onClick={handleDeleteProduct}>
-            Delete
+          <Button
+            variant="danger"
+            onClick={handleDeleteProduct}
+            style={{
+              backgroundColor: "#dc3545",
+              borderColor: "#dc3545",
+              fontWeight: "500",
+            }}
+          >
+            Delete Permanently
           </Button>
         </Modal.Footer>
       </Modal>

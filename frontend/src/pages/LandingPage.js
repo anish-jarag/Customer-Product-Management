@@ -1,6 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { FaUserCircle, FaSearch, FaShoppingCart, FaCog } from "react-icons/fa"; // Added FaCog
+import { FaUserCircle, FaSearch, FaShoppingCart, FaCog } from "react-icons/fa";
 
 const LandingPage = () => {
   return (
@@ -11,61 +10,82 @@ const LandingPage = () => {
         style={{ backgroundColor: "#fff8e1", padding: "1rem" }}
       >
         <div className="container-fluid d-flex align-items-center justify-content-between">
-          <Link
+          <div
             className="navbar-brand"
-            to="/"
             style={{
               fontFamily: "cursive",
               color: "#6b4226",
               fontSize: "1.8rem",
+              cursor: "default",
             }}
           >
             ShopiTech
-          </Link>
+          </div>
 
           <div className="d-flex gap-4">
-            <Link className="nav-link" to="/shop" style={{ color: "#6b4226" }}>
-              Shop All
-            </Link>
-            <Link
+            <span
               className="nav-link"
-              to="/mobiles"
-              style={{ color: "#6b4226" }}
+              style={{ color: "#6b4226", cursor: "default" }}
+            >
+              Shop All
+            </span>
+            <span
+              className="nav-link"
+              style={{ color: "#6b4226", cursor: "default" }}
             >
               Mobiles
-            </Link>
-            <Link
+            </span>
+            <span
               className="nav-link"
-              to="/accessories"
-              style={{ color: "#6b4226" }}
+              style={{ color: "#6b4226", cursor: "default" }}
             >
               Accessories
-            </Link>
-            <Link className="nav-link" to="/about" style={{ color: "#6b4226" }}>
+            </span>
+            <span
+              className="nav-link"
+              style={{ color: "#6b4226", cursor: "default" }}
+            >
               About Us
-            </Link>
+            </span>
           </div>
 
           <div className="d-flex gap-3">
-            <Link
-              to="/profile"
-              style={{ color: "#6b4226", fontSize: "1.5rem" }}
+            <span
+              style={{
+                color: "#6b4226",
+                fontSize: "1.5rem",
+                cursor: "default",
+              }}
             >
               <FaUserCircle />
-            </Link>
-            <Link to="/search" style={{ color: "#6b4226", fontSize: "1.5rem" }}>
+            </span>
+            <span
+              style={{
+                color: "#6b4226",
+                fontSize: "1.5rem",
+                cursor: "default",
+              }}
+            >
               <FaSearch />
-            </Link>
-            <Link to="/cart" style={{ color: "#6b4226", fontSize: "1.5rem" }}>
+            </span>
+            <span
+              style={{
+                color: "#6b4226",
+                fontSize: "1.5rem",
+                cursor: "default",
+              }}
+            >
               <FaShoppingCart />
-            </Link>
-            <Link
-              to="/settings"
-              style={{ color: "#6b4226", fontSize: "1.5rem" }}
+            </span>
+            <span
+              style={{
+                color: "#6b4226",
+                fontSize: "1.5rem",
+                cursor: "default",
+              }}
             >
               <FaCog />
-            </Link>{" "}
-            {/* New Settings Icon */}
+            </span>
           </div>
         </div>
       </nav>
