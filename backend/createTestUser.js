@@ -1,26 +1,39 @@
-// createTestUser.js
 const bcrypt = require("bcryptjs");
-const { connectDB, getDB } = require("./config/db"); // make sure the path is correct!
+const { connectDB, getDB } = require("./config/db"); // Make sure path is correct
 
-async function createTestUser() {
-  await connectDB(); // First connect to database
-  const db = getDB();
-  const users = db.collection("users");
+const usersData = [
+  { name: "Effat Mujawar", email: "effat.mujawar@gmail.com", role: "admin" },
+  { name: "Shruti Waychal", email: "shruti.waychal@gmail.com", role: "admin" },
+  { name: "Anish Jarag", email: "anish.jarag@gmail.com", role: "manager" },
+  {
+    name: "Tanishq Vankudre",
+    email: "tanishq.vankudre@gmail.com",
+    role: "manager",
+  },
+  { name: "Test User", email: "test.user@gmail.com", role: "user" },
+];
 
-  const password = "admin123"; // the plain text password
-  const hashedPassword = await bcrypt.hash(password, 10); // hashing the password
+async function createUsers() {
+  try {
+    await connectDB();
+    const db = getDB();
+    const users = db.collection("users");
 
-  await users.insertOne({
-    email: "em@gmail.com",
-    password: hashedPassword,
-    role: "admin",
-  });
+    const hashedUsers = await Promise.all(
+      usersData.map(async ({ name, email, role }) => {
+        const firstName = name.split(" ")[0];
+        const password = await bcrypt.hash(`${firstName}123`, 10);
+        return { name, email, password, role };
+      })
+    );
 
-  console.log("✅ Admin created!");
-  process.exit(); // Exit the script after running
+    const result = await users.insertMany(hashedUsers);
+    console.log(`✅ Inserted ${result.insertedCount} users.`);
+  } catch (err) {
+    console.error("❌ Error inserting users:", err);
+  } finally {
+    process.exit();
+  }
 }
 
-createTestUser().catch((err) => {
-  console.error("❌ Failed to create user:", err);
-  process.exit(1);
-});
+createUsers();

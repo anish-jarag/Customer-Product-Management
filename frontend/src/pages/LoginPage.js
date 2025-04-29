@@ -14,15 +14,10 @@ const Login = () => {
     e.preventDefault();
     try {
       const { token } = await loginUser(email, password);
-
       if (token) {
         localStorage.setItem("token", token);
-
         const decoded = jwtDecode(token);
         const userRole = decoded.user.role;
-
-        console.log(decoded);
-
         if (userRole === "admin" || userRole === "manager") {
           navigate("/DashboardPage");
         } else {
@@ -42,24 +37,30 @@ const Login = () => {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(to right, #f5f5dc, #d2b48c)",
+        background:
+          "radial-gradient(circle at top left, #F3F4F6,rgba(194, 172, 172, 0.71) 60%)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        fontFamily: "Segoe UI, sans-serif",
       }}
     >
       <div
         className="card shadow p-4"
         style={{
-          width: "22rem",
+          width: "24rem",
           borderRadius: "1rem",
-          backgroundColor: "#fff8dc",
+          backgroundColor: "#4B5563",
+          color: "#E5E7EB",
         }}
       >
-        <h3 className="text-center mb-4 text-brown">Login</h3>
+        <h3 className="text-center mb-4">Login</h3>
 
-        {/* Error Message */}
-        {error && <div className="alert alert-danger">{error}</div>}
+        {error && (
+          <div className="alert alert-danger text-center" role="alert">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group mb-3">
@@ -71,6 +72,10 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              style={{
+                backgroundColor: "#FFFFFF",
+                color: "#4B5563",
+              }}
             />
           </div>
           <div className="form-group mb-3">
@@ -78,23 +83,45 @@ const Login = () => {
             <input
               type="password"
               className="form-control"
-              placeholder="Password"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              style={{
+                backgroundColor: "#FFFFFF",
+                color: "#4B5563",
+              }}
             />
           </div>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <a href="/forgot-password" className="small text-brown">
+
+          <div className="d-flex justify-content-end mb-3">
+            <a
+              href="/forgot-password"
+              style={{ color: "#E5E7EB", fontSize: "0.9rem" }}
+            >
               Forgot Password?
             </a>
           </div>
-          <button type="submit" className="btn btn-brown w-100 mb-2">
+
+          <button
+            type="submit"
+            className="btn w-100 mb-2"
+            style={{
+              backgroundColor: "#E5E7EB",
+              color: "#4B5563",
+              fontWeight: "600",
+              border: "none",
+            }}
+          >
             Login
           </button>
-          <p className="text-center small mt-2">
+
+          <p className="text-center mt-3" style={{ fontSize: "0.9rem" }}>
             New user?{" "}
-            <a href="/signup" className="text-brown">
+            <a
+              href="/signup"
+              style={{ color: "#E5E7EB", textDecoration: "underline" }}
+            >
               Sign Up
             </a>
           </p>
