@@ -9,6 +9,7 @@ import ProductDetails from "./pages/ProductDetailsPage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ProductCrud from "./pages/ProductCrud";
 import CustomerCRUD from "./pages/CustomerCURD";
+import ResetPassword from "./pages/ResetPasswordPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/products" element={<ProductCrud />} />
         <Route path="/ProductDetailsPage" element={<ProductDetails />} />
         <Route path="/customers" element={<CustomerCRUD />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
     </Router>
   );

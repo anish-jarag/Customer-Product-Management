@@ -7,27 +7,15 @@ const findUserByEmail = async (email) => {
   return await users.findOne({ email });
 };
 
-// Create new user
 const createUser = async (userData) => {
   const users = getUserCollection();
   const result = await users.insertOne(userData);
-  return result;
+  return result.ops?.[0] || await users.findOne({ _id: result.insertedId });
 };
 
-// Save reset token and expiry
-const saveResetToken = async (email, token, expiry) => {
-  const users = getUserCollection();
-  await users.updateOne(
-    { email },
-    { $set: { resetToken: token, resetTokenExpiry: expiry } }
-  );
-};
-
-// Save password reset token with 1 hour expiry
 const savePasswordResetToken = async (email, resetToken) => {
   const users = getUserCollection();
-  const expiryTime = new Date();
-  expiryTime.setHours(expiryTime.getHours() + 1);
+  const expiryTime = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
   await users.updateOne(
     { email },
@@ -40,13 +28,11 @@ const savePasswordResetToken = async (email, resetToken) => {
   );
 };
 
-// Find user by reset token
 const findUserByResetToken = async (token) => {
   const users = getUserCollection();
   return await users.findOne({ resetToken: token });
 };
 
-// Update password and clear reset token fields
 const updatePassword = async (email, hashedPassword) => {
   const users = getUserCollection();
   await users.updateOne(
@@ -61,8 +47,7 @@ const updatePassword = async (email, hashedPassword) => {
 module.exports = {
   findUserByEmail,
   createUser,
-  saveResetToken,
+  savePasswordResetToken,
   findUserByResetToken,
   updatePassword,
-  savePasswordResetToken,
 };
