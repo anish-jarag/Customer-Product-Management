@@ -19,6 +19,7 @@ const ProductCrud = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(5);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const colors = {
     primaryBrown: "#6b4226",
@@ -70,7 +71,7 @@ const ProductCrud = () => {
         process.env.REACT_APP_BASE_URL +
           `/api/products?page=${currentPage}&limit=${productsPerPage}`
       );
-      setProducts(res.data.data); // Make sure your API returns { data: [...] }
+      setProducts(res.data.data);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching products:", err);
@@ -123,7 +124,6 @@ const ProductCrud = () => {
         }
       );
 
-      // Verify the response structure
       console.log("Update response:", res.data);
 
       if (res.data && res.data._id) {
@@ -165,8 +165,6 @@ const ProductCrud = () => {
       isPublished: false,
     });
   };
-
-  const [isUpdating, setIsUpdating] = useState(false);
 
   if (loading) {
     return (
@@ -412,7 +410,6 @@ const ProductCrud = () => {
         </Modal.Body>
       </Modal>
 
-      {/* Edit Product Modal */}
       {/* Edit Product Modal */}
       <Modal
         show={showEditModal}

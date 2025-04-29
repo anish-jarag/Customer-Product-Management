@@ -9,7 +9,7 @@ const CustomerCRUD = () => {
   const [order, setOrder] = useState("desc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(""); // Success message state
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -44,12 +44,12 @@ const CustomerCRUD = () => {
   const handleAddCustomer = async (e) => {
     e.preventDefault();
     setError(null);
-    setSuccessMessage(""); // Reset success message
+    setSuccessMessage("");
     try {
       await axios.post("/api/customers", formData);
       setFormData({ name: "", address: "", email: "", phone: "" });
       fetchCustomers();
-      setSuccessMessage("Customer added successfully!"); // Set success message
+      setSuccessMessage("Customer added successfully!");
     } catch (err) {
       console.error(
         "Failed to add customer",
@@ -73,14 +73,14 @@ const CustomerCRUD = () => {
   const handleUpdateCustomer = async (e) => {
     e.preventDefault();
     setError(null);
-    setSuccessMessage(""); // Reset success message
+    setSuccessMessage("");
     try {
       await axios.put(`/api/customers/${editingCustomerId}`, formData);
       setFormData({ name: "", address: "", email: "", phone: "" });
       setEditingCustomerId(null);
       setIsEditing(false);
       fetchCustomers();
-      setSuccessMessage("Customer updated successfully!"); // Set success message
+      setSuccessMessage("Customer updated successfully!");
     } catch (err) {
       console.error(
         "Failed to update customer",
@@ -102,7 +102,7 @@ const CustomerCRUD = () => {
       } else {
         fetchCustomers();
       }
-      setSuccessMessage("Customer deleted successfully!"); // Set success message on delete
+      setSuccessMessage("Customer deleted successfully!");
     } catch (err) {
       console.error(
         "Failed to delete customer",

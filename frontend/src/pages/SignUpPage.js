@@ -6,34 +6,29 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const SignUp = () => {
   const navigate = useNavigate();
 
-  // Initialize formData correctly
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
     phone: "",
-    role: "user", // Default role
+    role: "user",
   });
 
   const [error, setError] = useState("");
 
-  // Handle form field changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check password match
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
       return;
     }
 
     try {
-      // Send data to backend
       const response = await axios.post(
         process.env.REACT_APP_BASE_URL + "/api/auth/register",
         {
@@ -46,7 +41,6 @@ const SignUp = () => {
       );
 
       if (response.status === 200 || response.status === 201) {
-        // Navigate based on role
         if (formData.role === "user") {
           navigate("/landingPage");
         } else if (formData.role === "admin" || formData.role === "manager") {
@@ -80,8 +74,6 @@ const SignUp = () => {
         }}
       >
         <h3 className="text-center mb-4 text-brown">Sign Up</h3>
-
-        {/* Show error if any */}
         {error && <div className="alert alert-danger">{error}</div>}
 
         {/* Form */}

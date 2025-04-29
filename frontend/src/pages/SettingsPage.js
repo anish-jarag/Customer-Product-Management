@@ -3,21 +3,19 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState({
-    theme: "light", // theme can be light or dark
-    allowRegistration: true, // registration toggle
+    theme: "light",
+    allowRegistration: true,
   });
 
-  // Fetch current settings from DB when page loads
   useEffect(() => {
     fetchSettings();
   }, []);
 
   const fetchSettings = async () => {
     try {
-      // Replace with your real API call
       const response = await fetch("/api/settings");
       const data = await response.json();
-      setSettings(data); // Set the state with fetched data
+      setSettings(data);
     } catch (error) {
       console.error("Failed to fetch settings", error);
     }
